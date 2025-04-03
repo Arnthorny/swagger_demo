@@ -105,7 +105,7 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:3000",
+        url: process.env.SERVER_URI || "http://localhost:3000",
         description: "Development server",
       },
     ],
