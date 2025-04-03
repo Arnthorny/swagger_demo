@@ -29,19 +29,16 @@ class userController {
    *       content:
    *         application/json:
    *           schema:
-   *             type: object
-   *             required:
-   *               - username
-   *               - password
-   *             properties:
-   *               username:
-   *                 type: string
-   *                 description: User's unique username
-   *               password:
-   *                 type: string
+   *               $ref: '#/components/schemas/SignupLoginRequestBody'
    *     responses:
    *       201:
    *         description: Signup successful
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/SignupLoginResponseBody'
+   *       400:
+   *         description: Bad request
    *         content:
    *           application/json:
    *             schema:
@@ -49,16 +46,6 @@ class userController {
    *               properties:
    *                 message:
    *                   type: string
-   *                   example: "Signup successful"
-   *                 data:
-   *                   type: object
-   *                   properties:
-   *                     username:
-   *                       type: string
-   *                       example: "johndoe"
-   *                     id:
-   *                       type: string
-   *                       example: "60d21b4667d0d8992e610c85"
    *       422:
    *         description: Validation error
    *         content:
@@ -73,13 +60,7 @@ class userController {
    *         content:
    *           application/json:
    *             schema:
-   *               type: object
-   *               properties:
-   *                 message:
-   *                   type: string
-   *                   example: "Error creating user"
-   *                 error:
-   *                   type: object
+   *               $ref: '#/components/schemas/GenericErrorStr'
    */
   static async signup(req, res) {
     try {
@@ -97,7 +78,7 @@ class userController {
         message: "Signup successful",
         data: {
           username: user.username,
-          id: user._id,
+          _id: user._id,
         },
       });
     } catch (error) {
@@ -105,10 +86,7 @@ class userController {
         res
           .status(400)
           .json({ message: `Username ${req.body.username} already exists` });
-      } else
-        res
-          .status(500)
-          .json({ message: "Error creating user", error: String(error) });
+      } else res.status(500).json({ error: String(error) });
     }
   }
 
@@ -124,35 +102,14 @@ class userController {
    *       content:
    *         application/json:
    *           schema:
-   *             type: object
-   *             required:
-   *               - username
-   *               - password
-   *             properties:
-   *               username:
-   *                 type: string
-   *               password:
-   *                 type: string
+   *               $ref: '#/components/schemas/SignupLoginRequestBody'
    *     responses:
    *       200:
    *         description: Login successful
    *         content:
    *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 message:
-   *                   type: string
-   *                   example: "Login successful"
-   *                 data:
-   *                   type: object
-   *                   properties:
-   *                     username:
-   *                       type: string
-   *                       example: "johndoe"
-   *                     id:
-   *                       type: string
-   *                       example: "60d21b4667d0d8992e610c85"
+   *           schema:
+   *               $ref: '#/components/schemas/SignupLoginResponseBody'
    *       422:
    *         description: Validation error
    *         content:
@@ -167,13 +124,7 @@ class userController {
    *         content:
    *           application/json:
    *             schema:
-   *               type: object
-   *               properties:
-   *                 message:
-   *                   type: string
-   *                   example: "Error during login"
-   *                 error:
-   *                   type: object
+   *               $ref: '#/components/schemas/GenericErrorStr'
    */
 
   static async login(req, res) {
@@ -197,7 +148,7 @@ class userController {
         });
       }
     } catch (error) {
-      res.status(500).json({ message: "Error during login", error });
+      res.status(500).json({ error: String(error) });
     }
   }
 
@@ -242,13 +193,13 @@ class userController {
    *         content:
    *           application/json:
    *             schema:
-   *               type: object
-   *               properties:
-   *                 message:
-   *                   type: string
-   *                   example: "Invalid old password"
+   *               $ref: '#/components/schemas/GenericErrorStr'
    *       401:
    *         description: Unauthorized - authentication required
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Unauthorized401'
    *       422:
    *         description: Validation error
    *         content:
@@ -263,13 +214,7 @@ class userController {
    *         content:
    *           application/json:
    *             schema:
-   *               type: object
-   *               properties:
-   *                 message:
-   *                   type: string
-   *                   example: "Error while resetting password"
-   *                 error:
-   *                   type: object
+   *               $ref: '#/components/schemas/GenericErrorStr'
    */
 
   static async resetPassword(req, res) {
@@ -280,7 +225,7 @@ class userController {
       const { oldPassword, newPassword } = validation.value;
 
       if (!bcrypt.compareSync(oldPassword, req.user.password))
-        res.status(400).json({ message: "Invalid old password" });
+        res.status(400).json({ error: "Invalid old password" });
       else {
         req.user.password = bcrypt.hashSync(newPassword, 15);
         await req.user.save();
@@ -288,9 +233,7 @@ class userController {
         res.status(200).json({ message: "Password updated successfully" });
       }
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: "Error while resetting password", error });
+      res.status(500).json({ error: String(error) });
     }
   }
 }

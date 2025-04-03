@@ -51,20 +51,15 @@ class imageController {
    *                 message:
    *                   type: string
    *                   example: "Upload successful"
-   *                 image:
-   *                   type: object
-   *                   properties:
-   *                     id:
-   *                       type: string
-   *                       example: "60d21b4667d0d8992e610c85"
-   *                     title:
-   *                       type: string
-   *                       example: "Mountain landscape"
-   *                     url:
-   *                       type: string
-   *                       example: "https://example.com/image.jpg"
+   *                 data:
+   *                   $ref: '#/components/schemas/Image'
+
    *       401:
    *         description: Unauthorized - authentication required
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Unauthorized401'
    *       422:
    *         description: Validation error
    *         content:
@@ -79,13 +74,7 @@ class imageController {
    *         content:
    *           application/json:
    *             schema:
-   *               type: object
-   *               properties:
-   *                 message:
-   *                   type: string
-   *                   example: "Error uploading image"
-   *                 error:
-   *                   type: string
+   *               $ref: '#/components/schemas/GenericErrorStr'
    */
   static async uploadImage(req, res) {
     try {
@@ -101,14 +90,10 @@ class imageController {
 
       res.status(201).json({
         message: "Upload successful",
-        id: image._id,
-        title: image.title,
-        url: image.url,
+        data: image,
       });
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: "Error uploading image", error: String(error) });
+      res.status(500).json({ error: String(error) });
     }
   }
 
@@ -127,40 +112,13 @@ class imageController {
    *             schema:
    *               type: array
    *               items:
-   *                 type: object
-   *                 properties:
-   *                   _id:
-   *                     type: string
-   *                     example: "60d21b4667d0d8992e610c85"
-   *                   title:
-   *                     type: string
-   *                     example: "Mountain landscape"
-   *                   url:
-   *                     type: string
-   *                     example: "https://example.com/image.jpg"
-   *                   createdAt:
-   *                     type: string
-   *                     format: date-time
-   *                     example: "2023-05-20T15:24:33.456Z"
-   *                   updatedAt:
-   *                     type: string
-   *                     format: date-time
-   *                     example: "2023-05-21T09:12:45.789Z"
-   *                   authorId:
-   *                     type: string
-   *                     example: "60d21b4667d0d8992e610c85"
+   *                 $ref: '#/components/schemas/Image'
    *       500:
    *         description: Server error
    *         content:
    *           application/json:
    *             schema:
-   *               type: object
-   *               properties:
-   *                 message:
-   *                   type: string
-   *                   example: "Error while retrieving images"
-   *                 error:
-   *                   type: string
+   *               $ref: '#/components/schemas/GenericErrorStr'
    */
   static async getAllImages(req, res) {
     try {
@@ -169,7 +127,6 @@ class imageController {
       res.status(200).json(allImages);
     } catch (error) {
       res.status(500).json({
-        message: "Error while retrieving images",
         error: String(error),
       });
     }
@@ -196,38 +153,13 @@ class imageController {
    *         content:
    *           application/json:
    *             schema:
-   *               type: object
-   *               properties:
-   *                 _id:
-   *                   type: string
-   *                   example: "60d21b4667d0d8992e610c85"
-   *                 title:
-   *                   type: string
-   *                   example: "Mountain landscape"
-   *                 url:
-   *                   type: string
-   *                   example: "https://example.com/image.jpg"
-   *                 createdAt:
-   *                   type: string
-   *                   format: date-time
-   *                   example: "2023-05-20T15:24:33.456Z"
-   *                 updatedAt:
-   *                   type: string
-   *                   format: date-time
-   *                   example: "2023-05-21T09:12:45.789Z"
-   *                 authorId:
-   *                   type: string
-   *                   example: "60d21b4667d0d8992e610c85"
+   *               $ref: '#/components/schemas/Image'
    *       404:
    *         description: Image not found
    *         content:
    *           application/json:
    *             schema:
-   *               type: object
-   *               properties:
-   *                 error:
-   *                   type: string
-   *                   example: "Image not found"
+   *               $ref: '#/components/schemas/GenericErrorStr'
    *       422:
    *         description: Validation error
    *         content:
@@ -242,13 +174,7 @@ class imageController {
    *         content:
    *           application/json:
    *             schema:
-   *               type: object
-   *               properties:
-   *                 message:
-   *                   type: string
-   *                   example: "Error while retrieving image"
-   *                 error:
-   *                   type: string
+   *               $ref: '#/components/schemas/GenericErrorStr'
    */
   static async getSingleImage(req, res) {
     try {
@@ -263,7 +189,6 @@ class imageController {
       else res.status(200).json(img);
     } catch (error) {
       res.status(500).json({
-        message: "Error while retrieving image",
         error: String(error),
       });
     }
@@ -274,7 +199,7 @@ class imageController {
    * /api/images/{imageId}:
    *   delete:
    *     summary: Delete a single image
-   *     description: Deletes a specific image by its ID. Only the author of the image can delete it.
+   *     description: Delete image by ID. Only image author can delete image.
    *     tags: [Images]
    *     security:
    *       - BasicAuth: []
@@ -291,6 +216,10 @@ class imageController {
    *         description: Image successfully deleted (no content)
    *       401:
    *         description: Unauthorized - authentication required
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Unauthorized401'
    *       403:
    *         description: Forbidden - user is not the author of the image
    *         content:
@@ -303,6 +232,10 @@ class imageController {
    *                   example: "Forbidden from deleting"
    *       404:
    *         description: Image not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericErrorStr'
    *       422:
    *         description: Validation error
    *         content:
@@ -317,13 +250,7 @@ class imageController {
    *         content:
    *           application/json:
    *             schema:
-   *               type: object
-   *               properties:
-   *                 message:
-   *                   type: string
-   *                   example: "Error while deleting image"
-   *                 error:
-   *                   type: string
+   *               $ref: '#/components/schemas/GenericErrorStr'
    */
   static async deleteSingleImage(req, res) {
     try {
@@ -339,7 +266,6 @@ class imageController {
       else res.status(204);
     } catch (error) {
       res.status(500).json({
-        message: "Error while deleting image",
         error: String(error),
       });
     }
