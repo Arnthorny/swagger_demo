@@ -108,7 +108,7 @@ class userController {
    *         description: Login successful
    *         content:
    *           application/json:
-   *           schema:
+   *             schema:
    *               $ref: '#/components/schemas/SignupLoginResponseBody'
    *       422:
    *         description: Validation error
@@ -143,7 +143,7 @@ class userController {
           message: "Login successful",
           data: {
             username: user.username,
-            id: user._id,
+            _id: user._id,
           },
         });
       }

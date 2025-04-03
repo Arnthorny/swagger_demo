@@ -260,10 +260,14 @@ class imageController {
       const { imageId } = validation.value;
 
       const img = await imageModel.findById(imageId);
+      if (!img) res.status(404).json({ error: "Image not found" });
 
-      if (img.authorId !== req.user._id)
+      if (String(img.authorId) !== String(req.user._id))
         res.status(403).json({ error: "Forbidden from deleting" });
-      else res.status(204);
+      else {
+        await imageModel.deleteOne({ _id: img._id });
+        res.status(204).end();
+      }
     } catch (error) {
       res.status(500).json({
         error: String(error),

@@ -1,4 +1,3 @@
-const { string } = require("joi");
 const swaggerJsdoc = require("swagger-jsdoc");
 
 const options = {
@@ -45,6 +44,9 @@ const options = {
             authorId: {
               type: "string",
               example: "60d21b4667d0d8992e610c85",
+            },
+            __v: {
+              type: "integer",
             },
           },
         },
